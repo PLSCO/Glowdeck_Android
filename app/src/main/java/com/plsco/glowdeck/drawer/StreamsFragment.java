@@ -364,7 +364,6 @@ public class StreamsFragment extends EnhancedStreamsListFragment {
 	public StreamsFragment()
 	{
 
-		setHasOptionsMenu(true);
 	}
 
 	/* (non-Javadoc)

@@ -135,7 +135,6 @@ public class ProfileFragment extends Fragment  implements   LoadingTaskFinishedL
 	 */
 	public ProfileFragment()
 	{
-		setHasOptionsMenu(true);
 
 	}
 

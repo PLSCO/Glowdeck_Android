@@ -144,7 +144,7 @@ public class BTDeviceListActivity extends Activity {
 
 		// Indicate scanning in the title
 		setProgressBarIndeterminateVisibility(true);
-		setTitle("Glowdeck");
+		setTitle(R.string.scanning);
 
 		// Turn on sub-title for new devices
 		findViewById(R.id.title_new_devices).setVisibility(View.VISIBLE);
@@ -199,7 +199,6 @@ public class BTDeviceListActivity extends Activity {
 				// If it's already paired, skip it, because it's been listed already
 				if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
 					mNewDevicesArrayAdapter.add(device.getName() + "\n" + device.getAddress() );
-
 				}
 				// When discovery is finished, change the Activity title
 			} else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {

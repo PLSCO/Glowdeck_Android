@@ -122,8 +122,7 @@ public class EnhancedStreamsListFragment extends ListFragment implements OnTouch
 		// swipe always on 
 
 		mSwipeEnabled = true; // differs from how it was done prev
-		disableOnClickListener = CLICK_STATE.STARTED ;
-		setHasOptionsMenu(true);
+		disableOnClickListener = CLICK_STATE.STARTED ; 
 
 	}
 	protected  static CLICK_STATE  getDisableOnClickListener()

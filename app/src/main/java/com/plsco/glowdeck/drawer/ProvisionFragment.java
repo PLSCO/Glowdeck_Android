@@ -59,7 +59,6 @@ public class ProvisionFragment extends Fragment{
 	public ProvisionFragment(){
 
 
-		setHasOptionsMenu(true);
 
 	}
 

@@ -89,11 +89,10 @@ public class AboutFragment extends Fragment {
 	private boolean productionRelease = true ; 
 	private boolean mDebugMode = !productionRelease ; // diagnostic window in about screen
 
-	private boolean connectedToGlowdeck = false ;
+	private boolean connectedToGlowdeck = false ; 
+	public AboutFragment(){
 
-	public AboutFragment() {
 
-		setHasOptionsMenu(true);
 
 	}
 
@@ -104,11 +103,7 @@ public class AboutFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		
-		context = this.getActivity();
-
-        StreamsApplication streamsApplication = (StreamsApplication) MainActivity.getMainActivity().getApplication();
-        streamsApplication.getBluetoothSppManager().firmwareUpdateInProgress = false;
-
+		context = this.getActivity() ;
 		if (StreamsApplication.DEBUG_MODE)
 		{
 			Log.d("dbg","AboutFragment onCreateView") ;
@@ -139,15 +134,16 @@ public class AboutFragment extends Fragment {
 		mTextViewSPPResponse = (TextView)  rootView.findViewById(R.id.textViewSPPResponse)  ;
 		mTextViewSPPResponse.setMovementMethod(new ScrollingMovementMethod());
 		mTextViewSPPResponse.setText("") ;
-		int debugVisibility = View.INVISIBLE;
-
-		if (connectedToGlowdeck && mDebugMode) {
+		int debugVisibility = View.INVISIBLE ; 
+		if (connectedToGlowdeck && mDebugMode)
+		{
 
 			debugVisibility = View.VISIBLE ;
 
 		}
 
-		if (editTextGlowdeckSPP != null) {
+		if (editTextGlowdeckSPP != null)
+		{
 
 			editTextGlowdeckSPP.setVisibility(debugVisibility) ;
 			editTextGlowdeckSPP.setFocusable(true) ;
@@ -173,11 +169,13 @@ public class AboutFragment extends Fragment {
 			mTextViewSPPResponse.setVisibility(debugVisibility) ;
 		}
 
-		if (debugVisibility == View.VISIBLE ) {
+		if (debugVisibility == View.VISIBLE )
+		{
 			checkUpdatesTV.setVisibility(View.INVISIBLE) ;
 			buildNumberTV.setVisibility(View.INVISIBLE) ;
 		}
-		else {
+		else
+		{
 			checkUpdatesTV.setOnClickListener(new OnClickListener() {
 
 				@Override
@@ -230,17 +228,19 @@ public class AboutFragment extends Fragment {
 			}
 		});
 
+
 		buttonSendSPP.setOnClickListener( new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
 
 				String msg = editTextGlowdeckSPP.getText().toString() ;
-				if (msg.length() > 0) {
+				if (msg.length() > 0)
+				{
 					StreamsApplication streamsApplication = (StreamsApplication) MainActivity.getMainActivity().getApplication() ;
-					streamsApplication.getBluetoothSppManager().sendMessage(msg);
+					streamsApplication.getBluetoothSppManager().sendMessage(msg) ;
 
-					editTextGlowdeckSPP.setText("");
+					editTextGlowdeckSPP.setText("") ;
 				}
 			}
 		});
@@ -277,15 +277,12 @@ public class AboutFragment extends Fragment {
 
 			}
 		});
-		} catch(Exception e) {
-		    e.printStackTrace();
-		}
-
+		}catch(Exception e){e.printStackTrace();}
 		return rootView;
-
 	}
 
-	public void processSppResponse(String msg) {
+	public void processSppResponse(String msg)
+	{
 
 		try{
 		String rows[] = msg.split("\\^") ;
@@ -313,37 +310,31 @@ public class AboutFragment extends Fragment {
 			startActivity(
 					new Intent(Intent.ACTION_VIEW, Uri.parse("http://play.google.com/store/apps/details?id=" + appPackageName)));
 		}
-		mProcessingClick = false;
+		mProcessingClick = false ; 
 	}
+	void checkForFirmwareUpdate()
+	{
 
-	void checkForFirmwareUpdate() {
+		try{
+		CurrentGlowdecks currentGlowdecks ;
+		MainActivity mainActivity = MainActivity.getMainActivity() ;
+		GlowdeckDevice glowdeckDevice = mainActivity.getCurrentGlowdecks().getCurrentlyConnected() ;
+		if (glowdeckDevice==null)
+		{
 
-		try {
-			CurrentGlowdecks currentGlowdecks;
-			MainActivity mainActivity = MainActivity.getMainActivity();
+			Toast.makeText(context, "Not Connected to Glowdeck", Toast.LENGTH_LONG).show();
 
-            StreamsApplication streamsApplication = (StreamsApplication) MainActivity.getMainActivity().getApplication();
-            streamsApplication.getBluetoothSppManager().firmwareUpdateInProgress = true;
-
-			GlowdeckDevice glowdeckDevice = mainActivity.getCurrentGlowdecks().getCurrentlyConnected();
-			if (glowdeckDevice == null) {
-
-				Toast.makeText(context, "Not Connected to Glowdeck", Toast.LENGTH_LONG).show();
-
-				mProcessingClick = false;
-			} else {
-				new GetLatestFirmware().execute();
-			}
+			mProcessingClick = false ; 
 		}
-		catch(Exception e) {
-
-			e.printStackTrace();
-
+		else
+		{
+			new  GetLatestFirmware().execute() ;
 		}
+		}catch(Exception e){e.printStackTrace();}
 	}
 	public static class GetLatestFirmware extends AsyncTask<String, Integer, Long> {
 
-		ProgressDialog mProgressDialog;
+		ProgressDialog mProgressDialog ;
 		
 		@Override
 		protected void onCancelled() {
@@ -366,28 +357,13 @@ public class AboutFragment extends Fragment {
 
 		@Override
 		protected void onPostExecute(Long result) {
-
 			// TODO Auto-generated method stub
-			try {
-
-				MainActivity.getMainActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
-
-			    mProcessingClick = false;
-
-    			mProgressDialog.dismiss();
-
-                StreamsApplication streamsApplication = (StreamsApplication) MainActivity.getMainActivity().getApplication();
-
-                streamsApplication.getBluetoothSppManager().firmwareUpdateInProgress = false;
-
-			} catch(Exception e) {
-
-			    e.printStackTrace();
-
-			}
-
+			try{
+			MainActivity.getMainActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+			mProcessingClick = false ; 
+			mProgressDialog.dismiss();
+			}catch(Exception e){e.printStackTrace();}
 			super.onPostExecute(result);
-
 		}
 
 		@Override
@@ -408,15 +384,18 @@ public class AboutFragment extends Fragment {
 			try{
 			int currentBytes = values[0] ;
 			
-			if (currentBytes == 0) {
-			    mProgressDialog.setMessage("Starting Glowdeck firmware upload...") ;
+			if (currentBytes == 0)
+			{
+			mProgressDialog.setMessage("Starting Glowdeck firmware upload...") ;
 			}
-			else {
+			else
+			{
 				int totalBytes   = values[1] ;
 				int percent = currentBytes*100/totalBytes ;
 				 
-				if ( (percent > 0 ) && (percent % 1) == 0) {
-					mProgressDialog.setMessage("Updating Glowdeck - " + percent + "% Complete");
+				if ( (percent > 0 ) && (percent % 10) == 0)
+				{
+					mProgressDialog.setMessage("Updating Glowdeck - " + percent + "% Complete") ;
 				}
 			}
 			}catch(Exception e){e.printStackTrace();}
@@ -447,7 +426,7 @@ public class AboutFragment extends Fragment {
 			
 			HttpClient httpclient = new DefaultHttpClient();
 
-			final String firmwareUrl = "https://streams.io/glowdeck/firmware/images/glowdeckBeta.bin";
+			final String firmwareUrl = "https://streams.io/glowdeck/firmware/images/glowdeck.bin";
 
 			int firmwareSize = 0 ; 
 			String line = null ;
@@ -549,7 +528,6 @@ public class AboutFragment extends Fragment {
 			}
 			else
 			{
-				streamsApplication.getBluetoothSppManager().firmwareUpdateInProgress = true;
 				streamsApplication.getBluetoothSppManager().sendMessage("GFU^");
 			}
 			try {
@@ -650,9 +628,6 @@ public class AboutFragment extends Fragment {
 					streamsApplication.getBluetoothSppManager().sendMessage(glowdeckBuffRem);
 				}
 				bytesSent += remainder ;
-			}
-			else {
-				streamsApplication.getBluetoothSppManager().firmwareUpdateInProgress = false;
 			}
 			}catch(Exception e){e.printStackTrace();}
 			return null;

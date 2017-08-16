@@ -30,7 +30,6 @@ import com.plsco.glowdeck.colorpicker.AppConfig;
 import com.plsco.glowdeck.colorpicker.ColorPicker;
 import com.plsco.glowdeck.colorpicker.OpacityBar;
 import com.plsco.glowdeck.colorpicker.SVBar;
-import com.plsco.glowdeck.glowdeck.CurrentGlowdecks;
 import com.plsco.glowdeck.ui.MainActivity;
 import com.plsco.glowdeck.ui.StreamsApplication;
 import com.plsco.glowdeck.R;
@@ -105,110 +104,17 @@ public class PickerFragment extends Fragment  { //implements  OnColorChangedList
 
 
 
-	public PickerFragment() {
+	public PickerFragment(){
 
-	    // FIXES ISSUE #1
-        CurrentGlowdecks currentGlowdecks = MainActivity.getMainActivity().getCurrentGlowdecks();
 
-        if (currentGlowdecks != null) {
-
-            GlowdeckDevice connectedGlowdeck = currentGlowdecks.getCurrentlyConnected();
-
-            mCurrentDevice = connectedGlowdeck;
-
-            setHasOptionsMenu(true);
-
-        }
-        // FIXES ISSUE #1
-    }
-
-	@Override
-	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-
-		try {
-
-		    menu.clear();
-			inflater.inflate(R.menu.color_picker_actions, menu);
-
-			MenuItem menuItem = menu.findItem(R.id.action_settings);
-
-			menuItem.setVisible(false);
-
-			//menu.findItem(R.id.ic_stream_setting).setVisible(true);
-
-             menu.findItem(R.id.ic_stream_setting).setVisible(true);
-
-		}
-		catch (Exception e) {
-
-			e.printStackTrace();
-
-		}
-
-		super.onCreateOptionsMenu(menu, inflater);
 
 	}
-
-	@Override
-	public void onPrepareOptionsMenu(Menu menu) {
-
-		try {
-
-			menu.findItem(R.id.action_settings).setVisible(false);
-
-			menu.findItem(R.id.ic_stream_setting).setVisible(true);
-            //menu.findItem(R.id.individual_stream_settings).setVisible(true);
-
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		super.onPrepareOptionsMenu(menu);
-
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-
-		// Handle action bar actions click
-		switch (item.getItemId()) {
-
-			//case R.id.ic_stream_setting:
-            case R.id.ic_stream_setting:
-
-				try {
-					Intent appConfigIntent = new Intent(context.getApplicationContext(), AppConfig.class);
-
-					startActivity(appConfigIntent);
-
-					MainActivity.getMainActivity().overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-
-				}
-				catch (Exception e) {
-
-					e.printStackTrace();
-
-				}
-
-				return true;
-
-			default:
-
-				return super.onOptionsItemSelected(item);
-
-		}
-
-	}
-
-	/*
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		try{
-			menu.clear();
 		inflater.inflate(R.menu.color_picker_actions, menu);
 		MenuItem menuItem = menu.findItem(R.id.action_settings) ;
-		menuItem.setVisible(false);
+		menuItem.setVisible(false); 
 		menu.findItem(R.id.ic_stream_setting).setVisible(true);
 		}catch(Exception e){e.printStackTrace();}
 		super.onCreateOptionsMenu(menu,inflater);
@@ -224,6 +130,9 @@ public class PickerFragment extends Fragment  { //implements  OnColorChangedList
 		super.onPrepareOptionsMenu(menu);
 	}
 
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
+	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 
@@ -247,7 +156,6 @@ public class PickerFragment extends Fragment  { //implements  OnColorChangedList
 		}
 
 	}
-	*/
 
 	@Override
 	public void setUserVisibleHint(boolean isVisibleToUser) {
@@ -264,16 +172,16 @@ public class PickerFragment extends Fragment  { //implements  OnColorChangedList
 	 * @see android.app.Fragment#onCreateView(android.view.LayoutInflater, android.view.ViewGroup, android.os.Bundle)
 	 */
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
 		//Log.d(TAG,"onCreateView") ;
 
 		View rootView = null;
 		try{
-		MainActivity mainActivity = MainActivity.getMainActivity();
-		if (mainActivity == null) {
-            if (StreamsApplication.DEBUG_MODE) {
-                Log.d("dbg","PickerFragment onCreate::mainActivity::null::return") ;
-            }
+		MainActivity mainActivity = MainActivity.getMainActivity() ;
+		if (mainActivity == null )
+		{
+			//Log.d(TAG,"onCreate::mainActivity::return") ;
 
 			Intent intent = new Intent(this.getActivity(), MainActivity.class);
 			startActivity(intent);
@@ -290,20 +198,15 @@ public class PickerFragment extends Fragment  { //implements  OnColorChangedList
 		}
 
 
-		GlowdeckDevice glowdeckDevice = MainActivity.getMainActivity().getCurrentGlowdecks().getCurrentlyConnected() ;
+
+
+
+		GlowdeckDevice  glowdeckDevice = MainActivity.getMainActivity().getCurrentGlowdecks().getCurrentlySelected() ;
 		if (glowdeckDevice != null)
 		{
-			mCurrentDevice = glowdeckDevice;
+			mCurrentDevice = glowdeckDevice ; 
 
 		}
-		else {
-            GlowdeckDevice connectingGlowdeck = MainActivity.getMainActivity().getCurrentGlowdecks().getCurrentlyConnecting() ;
-            if (connectingGlowdeck != null)
-            {
-                mCurrentDevice = connectingGlowdeck;
-
-            }
-        }
 
 		picker =  (ColorPicker) rootView.findViewById(R.id.picker    );
 		svBar =  (SVBar) rootView.findViewById(R.id.svbar);
@@ -459,17 +362,18 @@ public class PickerFragment extends Fragment  { //implements  OnColorChangedList
             public void onClick(DialogInterface dialog, int which) {
 
                 // the user clicked on colors[which]
+
                 int anmInt = which - 1;
 
                 String anmString = "ANM:" + String.valueOf(anmInt) + "^";
 
                 final StreamsApplication streamsApplication = (StreamsApplication)MainActivity.getMainActivity().getApplication();
 
-                streamsApplication.getBluetoothSppManager().sendMessage(anmString);
+                if (mCurrentDevice != null) {
 
+                    streamsApplication.getBluetoothSppManager().sendMessage(anmString);
 
-
-
+                }
 
             }
 

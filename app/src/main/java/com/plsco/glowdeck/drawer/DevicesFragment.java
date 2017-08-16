@@ -39,10 +39,7 @@ import com.plsco.glowdeck.R;
  */
 public class DevicesFragment extends Fragment {
 
-	public DevicesFragment(){
-
-		setHasOptionsMenu(true);
-	}
+	public DevicesFragment(){}
 
 	/* (non-Javadoc)
 	 * @see android.app.Fragment#onCreateView(android.view.LayoutInflater, android.view.ViewGroup, android.os.Bundle)
