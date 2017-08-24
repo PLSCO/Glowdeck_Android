@@ -83,6 +83,10 @@ public class LoginActivity extends Activity implements OnItemClickListener ,  Lo
 	public final static  String PrefsPassword = "Password" ;
 	public final static  String PrefsDefaultString = "" ;
 	public final static  String PrefsStreamsUserVersion = "StreamsUserVersion" ;
+
+	public final static  String PrefsLatitude = "latitude" ;
+	public final static  String PrefsLongitude = "longitude" ;
+
 	//
 	//  Globals (static, private)
 	//

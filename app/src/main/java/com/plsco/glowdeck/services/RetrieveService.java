@@ -11,24 +11,19 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 import com.plsco.glowdeck.auth.LoginActivity;
-import com.plsco.glowdeck.glowdeck.CurrentGlowdecks;
 import com.plsco.glowdeck.ui.MainActivity;
 import com.plsco.glowdeck.ui.StreamsApplication;
 
-import org.apache.http.client.utils.URIUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,7 +47,7 @@ public class RetrieveService extends Service {
     public static String uuids = "";
     public  userLocation userLocation;
     public ArrayList<String> streamArray = new ArrayList();
-//    public HashMap<String,String> streamDict = new HashMap<String,String>();
+    public HashMap<String,String> streamDict = new HashMap<String,String>();
 
     public int weatherUpdated  = 0;
     public boolean firmwareUpdateActive  = false;
@@ -60,9 +55,8 @@ public class RetrieveService extends Service {
 
     private Handler handler;
     private Runnable runnable;
-    private final int runTime = 10*1000;
-    private final int waittime = 60*1000;
-    public String keyquery = "news,politics,technology,war,sports";
+    private final int runTime = 10*60*10000;
+
     /* (non-Javadoc)
 	 * @see android.app.Service#onBind(android.content.Intent)
 	 */
@@ -94,58 +88,44 @@ public class RetrieveService extends Service {
         };
         handler.post(runnable);
 
-        final Handler handler1 = new Handler();
-        handler1.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                // Do something after 5s = 5000ms
-                getRequestStreams(keyquery);
-            }
-        }, waittime);
-
-        getAddress();
-
     }
 
 
     /*
 
      */
-    public void updateWeather(boolean tx) {
-
+    public  void updateWeather(boolean tx)
+    {
         if (!isWeatherAvailable()) { return; }
 
         if (userLocation == null)
             return;
 
         if (userLocation.country.length() == 2 && weatherUpdated > -3) {
-
             // "&APPID=0dc5670d4037da812f743888ecf5a3e3"
-
             String weatherString = "http://api.openweathermap.org/data/2.5/weather?q=";
-
             weatherString += userLocation.city;
-
             weatherString += ",";
-
             weatherString += userLocation.country;
-
             weatherString += "&APPID=0dc5670d4037da812f743888ecf5a3e3";
 
-            URI uri = URI.create(weatherString);
 
-            String weatherUrl = uri.toASCIIString();
+            try {
 
-            getWeatherData(weatherUrl, tx);
+                String weatherUrl = URLEncoder.encode(weatherString, "utf-8");
+
+                getWeatherData(weatherUrl, tx);
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
 
         }
     }
 
     public void getWeatherData(String urlString, final boolean tx) {
 
-        if (!isWeatherAvailable()) { return; };
 
-        RequestQueue queue = Volley.newRequestQueue(msCurrentContext);
+        if (!isWeatherAvailable()) { return; };
 
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
                 (Request.Method.GET, urlString, null, new Response.Listener<JSONObject>() {
@@ -165,14 +145,13 @@ public class RetrieveService extends Service {
                 });
 
 
-        queue.add(jsObjRequest);
     }
 
-    public void setWeatherData(JSONObject json, boolean tx) {
+    public void setWeatherData(JSONObject json, boolean tx)
+    {
 
 
         try {
-
             JSONArray weather = (JSONArray) json.get("weather");
 
             if (weather.length() > 0 && weather != null) {
@@ -190,7 +169,7 @@ public class RetrieveService extends Service {
                 double temp = main.getDouble("temp");
 
                 if (userLocation.country.equals("US"))
-                    tempConvert = (int)(temp * (9.0/5.0) - 459.67);
+                    tempConvert = (int)(temp * (9/5) - 459.67);
                 else
                     tempConvert = (int)(temp - 273.15);
 
@@ -203,7 +182,7 @@ public class RetrieveService extends Service {
             //tickerTextRightToLeft
 
 
-            String glowdeckTransmit = String.format("WTR:%s|%s|%s^", userLocation.temperature, userLocation.forecast, userLocation.city);
+            String glowdeckTransmit = String.format("WTR:%d|%s|%s^\r", userLocation.temperature, userLocation.forecast, userLocation.city);
 
             bleSend(glowdeckTransmit);
             weatherUpdated = 1;
@@ -214,33 +193,19 @@ public class RetrieveService extends Service {
     }
 
     public void bleSend(String sendCmd) {
-
-        /*
         if (firmwareUpdateActive && !sendCmd.contains("GFU")) {
             Log.d("[TX CANCEL] %s", sendCmd);
             return;
         }
-        */
 
+        Log.d("[SEND] %s", sendCmd);
         final StreamsApplication streamsApplication = (StreamsApplication) MainActivity.getMainActivity().getApplication();
-
-        if (streamsApplication.getBluetoothSppManager().firmwareUpdateInProgress == false) {
-
-            Log.d("[SEND] %s", sendCmd);
-
-            streamsApplication.getBluetoothSppManager().sendMessage(sendCmd);
-
-        }
-        else {
-
-            Log.d("[TX CANCEL] %s", sendCmd);
-
-        }
+        streamsApplication.getBluetoothSppManager().sendMessage(sendCmd);
 
     }
 
-    public  boolean isWeatherAvailable() {
-
+    public  boolean isWeatherAvailable()
+    {
         return true;
 
 //        var zeroAddress = sockaddr_in()
@@ -270,71 +235,21 @@ public class RetrieveService extends Service {
     }
 
 
-    public void showStream() {
-
-        boolean streamSwitch;
-
-        CurrentGlowdecks currentGlowdecks = MainActivity.getMainActivity().getCurrentGlowdecks();
-
-        CurrentGlowdecks.GlowdeckDevice connectedGlowdeck = currentGlowdecks.getCurrentlyConnected();
-
-        if (connectedGlowdeck == null) {
-
-            final Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    // Do something after 5s = 5000ms
-                    showStream();
-                }
-            }, waittime);
-            return;
-
-
-        }
 
 
 
 
 
-        if (!connectedGlowdeck.getCurrentDisplayStreamsSwitch()) {
-            final Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    // Do something after 5s = 5000ms
-                    showStream();
-                }
-            }, waittime);
-            return;
-        }
-        if (streamArray.size() > 0) {
+
+
+
+
+
+    public void showStream(){
+        if (streamArray.size() > 0)
+        {
             String pop = streamArray.remove(0);
             bleSend(pop);
-        }
-
-        if (streamArray.size() == 0) {
-            final Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    // Do something after 5s = 5000ms
-                    getRequestStreams(keyquery);
-                }
-            }, 60*1000);
-        }
-        else {
-
-            Random r = new Random();
-
-            final Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    // Do something after 5s = 5000ms
-                    showStream();
-                }
-            }, waittime);
         }
     }
 
@@ -370,8 +285,12 @@ public class RetrieveService extends Service {
         try {
             if (keywords.size() == 1) {
 
+
+
                 params += URLEncoder.encode((String) keywords.get(0), "utf-8");
                 params += ")";
+
+
 
             }
             else {
@@ -394,8 +313,6 @@ public class RetrieveService extends Service {
         Log.d("dbg", "Stream Query Endpoint URL:" + urlString);
 
 
-        RequestQueue queue = Volley.newRequestQueue(msCurrentContext);
-
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
                 (Request.Method.GET, urlString, null, new Response.Listener<JSONObject>() {
 
@@ -415,11 +332,16 @@ public class RetrieveService extends Service {
 
                                     if (jsonDict.has("posts")) {
 
-                                        JSONArray postsDict = jsonDict.getJSONArray("posts");
+                                        JSONObject postsDict = jsonDict.getJSONObject("posts");
 
-                                        for (int i = 0; i < postsDict.length() ; i++)
-                                        {
-                                            JSONObject postDict = postsDict.getJSONObject(i);
+                                        Iterator<String> keys = postsDict.keys();
+
+                                        while (keys.hasNext()) {
+                                            // Get the key
+                                            String key = keys.next();
+
+                                            // Get the value
+                                            JSONObject postDict = postsDict.getJSONObject(key);
 
                                             if (postDict.has("uuid")) {
 
@@ -446,11 +368,8 @@ public class RetrieveService extends Service {
                                                             String result1 = "NOT:";
                                                             String source = threadDict.getString("site");
                                                             if (source.contains(".")) {
-
-                                                                ArrayList<String> srcComps = new ArrayList(Arrays.asList(source.split("\\.")));
-
-
-                                                                source = srcComps.get(0);
+                                                                String[] srcComps = source.split(".");
+                                                                source = srcComps[0];
                                                             }
                                                             if (source.length() > 5) {
                                                                 result1 += source.substring(0, 1).toUpperCase() + source.substring(1);
@@ -466,8 +385,8 @@ public class RetrieveService extends Service {
 
                                                             String streamUrl = threadDict.getString("url");
 
-                                                            streamArray.add(result1);
-//                                                            streamDict.put(result1, streamUrl);
+                                                            streamArray.add(result);
+                                                            streamDict.put(result, streamUrl);
 
                                                         }
                                                     }
@@ -478,6 +397,9 @@ public class RetrieveService extends Service {
 
                                         if (!streamArray.isEmpty()) {
 
+                                            Random r = new Random();
+                                            int wait = r.nextInt(60 - 10) + 10;
+
                                             final Handler handler = new Handler();
                                             handler.postDelayed(new Runnable() {
                                                 @Override
@@ -485,7 +407,7 @@ public class RetrieveService extends Service {
                                                     // Do something after 5s = 5000ms
                                                     showStream();
                                                 }
-                                            }, waittime);
+                                            }, wait);
 
                                         } else {
 
@@ -496,7 +418,7 @@ public class RetrieveService extends Service {
                                                     // Do something after 5s = 5000ms
                                                     showStream();
                                                 }
-                                            }, 180*1000);
+                                            }, 180);
                                         }
 
                                     }
@@ -513,18 +435,8 @@ public class RetrieveService extends Service {
                     public void onErrorResponse(VolleyError error) {
                         // TODO Auto-generated method stub
 
-                        final Handler handler1 = new Handler();
-                        handler1.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                // Do something after 5s = 5000ms
-                                getRequestStreams(keyquery);
-                            }
-                        }, 10*1000);
                     }
                 });
-
-        queue.add(jsObjRequest);
 
     }
 
