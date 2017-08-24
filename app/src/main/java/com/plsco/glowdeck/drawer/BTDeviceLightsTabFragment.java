@@ -13,6 +13,7 @@ public class BTDeviceLightsTabFragment extends Fragment {
 	//private FragmentTabHost mTabHost;
 	//Mandatory Constructor
     public BTDeviceLightsTabFragment() {
+        setHasOptionsMenu(true);
     }
 	
     @Override

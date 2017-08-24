@@ -53,7 +53,7 @@ import com.plsco.glowdeck.drawer.StreamsDrawerListAdapter;
 import com.plsco.glowdeck.drawer.StreamsFragment;
 import com.plsco.glowdeck.glowdeck.CurrentGlowdecks;
 import com.plsco.glowdeck.services.UpdaterService;
-import com.plsco.glowdeck.settings.StreamsSettingsActivity;
+//import com.plsco.glowdeck.settings.StreamsSettingsActivity;
 import com.plsco.glowdeck.R;
 import com.plsco.glowdeck.glowdeck.CurrentGlowdecks.GlowdeckDevice;
 
@@ -120,7 +120,7 @@ public class MainActivity extends   Activity  {
     //
     // Globals
     //
-    private int											mCurrentGlowdeckIndex   ;
+    public  int											mCurrentGlowdeckIndex   ;
     private Fragment 									mCurrentFragment = null;
     public void setmCurrentFragment(Fragment mCurrentFragment) {
         this.mCurrentFragment = mCurrentFragment;
@@ -129,10 +129,10 @@ public class MainActivity extends   Activity  {
         return mCurrentFragment;
     }
     private Fragment 									mPreviousFragment = null;
-    private StreamsApplication mStreamsApplication = null;
+    private StreamsApplication                          mStreamsApplication = null;
     private ActionBarDrawerToggle 						mDrawerToggle ;
-    private DrawerLayout 								mDrawerLayout;
-    private ListView 									mDrawerList;
+    public  DrawerLayout 								mDrawerLayout;
+    public  ListView 									mDrawerList;
     private ActionBar 									mActionBar   ;
     private ActionBar.Tab                               mTabWifi ;
     private ActionBar.Tab                               mTabLights ;
@@ -142,7 +142,7 @@ public class MainActivity extends   Activity  {
     private static BlueToothdeviceTab                   mBlueToothdeviceTab = BlueToothdeviceTab.WIFI_TAB ;
 
     private CharSequence 								mDrawerTitle;// drawer title
-    private boolean 									mStreamSettingsOn = true ; // initially, the setting is visible
+    private boolean 									mStreamSettingsOn = false ; // initially, the setting is visible
 
     private String[] 									mStreamsMenuTitles = null; // slide menu items
     private TypedArray 									mStreamsMenuIcons = null ;
@@ -360,7 +360,7 @@ public class MainActivity extends   Activity  {
                 msCurrentGlowdecks = new CurrentGlowdecks(bluetoothSppManager) ;
             }
 
-            msApplicationContext = getBaseContext() ;
+            msApplicationContext =  getBaseContext() ;
 
             setTheme(android.R.style.Theme_Holo_Light_DarkActionBar);
             setContentView(R.layout.activity_main);
@@ -413,7 +413,8 @@ public class MainActivity extends   Activity  {
             ) {
                 public void onDrawerClosed(View view) {
                     String menuTitle = mTitle.toString();
-                    getActionBar().setTitle(menuTitle);
+                    setTitle(menuTitle);
+
 
                     // calling onPrepareOptionsMenu() to show action bar icons
                     invalidateOptionsMenu();
@@ -422,7 +423,7 @@ public class MainActivity extends   Activity  {
 
                 public void onDrawerOpened(View drawerView) {
                     String menuTitle = mDrawerTitle.toString();
-                    getActionBar().setTitle(menuTitle);
+                    setTitle(menuTitle);
 
 
                     invalidateOptionsMenu();
@@ -438,6 +439,22 @@ public class MainActivity extends   Activity  {
 
             mBatteryLevel = 0 ;
             registerReceiver(this.mBatInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+
+
+            mStreamSettingsOn = false;
+
+
+            msPrevStreamsState = StreamsScreenState.PICKER_VIEW;
+            msStreamsState =  StreamsScreenState.DEVICES_VIEW;
+
+
+            msDevicesClicked = true ;
+            msMenusInitialized = true;
+
+            mStreamsDrawerListAdapter.notifyDataSetChanged() ;
+
+
+
         }catch(Exception e){e.printStackTrace();}
     } // done with onCreate()
 
@@ -453,6 +470,9 @@ public class MainActivity extends   Activity  {
         try{
             mDrawerToggle.syncState();
             mDrawerLayout.setDrawerListener(mDrawerToggle);
+
+
+
             if (StreamsApplication.DEBUG_MODE)
             {
                 Log.d("dbg","MainActivity::onPostCreate::savedInstanceState=" + savedInstanceState) ;
@@ -520,7 +540,7 @@ public class MainActivity extends   Activity  {
             }
             if (msStreamsState == StreamsScreenState.PICKER_VIEW)
             {
-                displayView(DRAWER_SHOW_PICKER)  ;
+                displayView(DRAWER_SHOW_PICKER);
                 return ;
 
             }
@@ -549,7 +569,7 @@ public class MainActivity extends   Activity  {
 
                 if (msStreamsState == StreamsScreenState.STREAM_SETTINGS)
                 {
-                    Intent intent = new Intent(MainActivity.this, StreamsSettingsActivity.class);
+                    Intent intent = new Intent(MainActivity.this, AppConfig.class);
                     startActivityForResult(intent,  0);
                 }
                 else
@@ -558,14 +578,20 @@ public class MainActivity extends   Activity  {
                     {
                         // starting out, but did a pseudo-login, so default to
                         // the streams_screen
-                        // msStreamsState = StreamsScreenState.STREAMS_VIEW ;
 
-                        msStreamsState = StreamsScreenState.PICKER_VIEW ;
+                        //msStreamsState = StreamsScreenState.PICKER_VIEW ;
+                        //displayView(DRAWER_SHOW_PICKER);
+
+                        msStreamsState = StreamsScreenState.STREAMS_VIEW ;
                         displayView(DRAWER_STREAM_FRAGMENT) ;
+
                     }
                 }
             }
         }catch(Exception e){e.printStackTrace();}
+
+
+
     }
     /**
      * Slide menu item click listener
@@ -592,6 +618,7 @@ public class MainActivity extends   Activity  {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
+
         if ( msStreamsState ==  StreamsScreenState.PICKER_VIEW)
         {
             return super.onCreateOptionsMenu(menu);
@@ -657,18 +684,18 @@ public class MainActivity extends   Activity  {
 
             case R.id.ic_stream_setting:
 
-                if ( msStreamsState ==  StreamsScreenState.PICKER_VIEW)
-                {
+//                if ( msStreamsState ==  StreamsScreenState.PICKER_VIEW)
+//                {
                     return super.onOptionsItemSelected(item);
-                }
-
-                try{
-                    msStreamsState = StreamsScreenState.STREAM_SETTINGS ;
-                    Intent intent = new Intent(MainActivity.this, StreamsSettingsActivity.class);
-                    startActivity(intent);
-                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-                }catch(Exception e){e.printStackTrace();}
-                return true;
+//                }
+//
+//                try{
+//                    msStreamsState = StreamsScreenState.STREAM_SETTINGS ;
+//                    Intent intent = new Intent(MainActivity.this, StreamsSettingsActivity.class);
+//                    startActivity(intent);
+//                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+//                }catch(Exception e){e.printStackTrace();}
+//                return true;
             case R.id.ic_stream_type:
                 try{
                     switchStreamPage(  item) ;
@@ -802,7 +829,16 @@ public class MainActivity extends   Activity  {
         // if streams drawer is opened, then hide the streams setting items
         if ( msStreamsState ==  StreamsScreenState.PICKER_VIEW)
         {
+            boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
+            boolean streamSettingsOn = false ;
+
+            msStreamsState = msPrevStreamsState ;
+            mCurrentFragment  = mPreviousFragment  ;
+
+            menu.findItem(R.id.action_settings).setVisible(false);
+
             return super.onPrepareOptionsMenu(menu);
+
         }
         try{
             boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
@@ -816,7 +852,7 @@ public class MainActivity extends   Activity  {
 
             if ((msStreamsState == StreamsScreenState.STREAMS_VIEW) || mStreamSettingsOn)
             {
-                streamSettingsOn = true ;
+                streamSettingsOn = false;
             }
             if (drawerOpen)
             {
@@ -883,11 +919,24 @@ public class MainActivity extends   Activity  {
 //			{
 //				//noOp = true ;
 //				//break ;
-//			}
-                    msStreamsState =  StreamsScreenState.PICKER_VIEW ;
+
+
+                    //msStreamsState =  StreamsScreenState.DEVICES_VIEW;
+                    //msMenusInitialized = true ;
+                    //msDevicesClicked = true; //!msDevicesClicked ;
+
+                    //mCurrentFragment = null ; //new DevicesFragment();
+                    //mStreamsDrawerListAdapter.notifyDataSetChanged();
+
+                    msStreamsState =  StreamsScreenState.PICKER_VIEW;
                     mCurrentFragment = new PickerFragment();
+
                     mStreamSettingsOn = false ;
                     timeout = 100 ;
+
+
+
+
                     break;
 
 
@@ -931,9 +980,12 @@ public class MainActivity extends   Activity  {
                         msPrevStreamsState = msStreamsState ;
                         mPreviousFragment =  mCurrentFragment ;
                     }
+
                     msStreamsState =  StreamsScreenState.DEVICES_VIEW ;
                     msMenusInitialized = true ;
                     msDevicesClicked = !msDevicesClicked ;
+
+                    mStreamSettingsOn = false ;
 
                     mCurrentFragment = null ; //new DevicesFragment();
                     mStreamsDrawerListAdapter.notifyDataSetChanged() ;
@@ -957,11 +1009,14 @@ public class MainActivity extends   Activity  {
                         e.printStackTrace();
                     }
 
+                    mStreamSettingsOn = false ;
+
                     break;
 
                 case DRAWER_GLOWDECK_DEVICES0:
 
                     mCurrentGlowdeckIndex = 0;
+                    mStreamSettingsOn = false ;
 
                     getCurrentGlowdecks().setCurrentlySelected(mCurrentGlowdeckIndex);
 
@@ -985,9 +1040,9 @@ public class MainActivity extends   Activity  {
 
                         startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
 
-                        //noOp = true;
+                        noOp = true;
 
-                        //break ;
+                        break ;
 
                     }
                     else {
@@ -1004,12 +1059,11 @@ public class MainActivity extends   Activity  {
 
                             // return;
 
-                        }
-                        else {
+                        } else {
 
                             mStreamSettingsOn = false;
 
-                            // noOp = true;
+                            noOp = true;
 
                             if (!bluetoothSppManager.isConnected() && (!bluetoothSppManager.isConnecting(mCurrentGlowdeckIndex))) {
 
@@ -1020,37 +1074,37 @@ public class MainActivity extends   Activity  {
                                 mStreamsDrawerListAdapter.notifyDataSetChanged();
 
                             }
-                            else {
+//                            else if (bluetoothSppManager.isConnected()) {
 
-                                if (bluetoothSppManager.isConnected()) {
+                                // noOp = false;
 
-                                    if (!msCurrentGlowdecks.getCurrentlyConnected().isReceivedInit()) {
+                                //if (!msCurrentGlowdecks.getCurrentlyConnected().isReceivedInit()) {
 
-                                        // noOp = true;
+                                // noOp = true;
 
-                                        // bluetoothSppManager.sendMessage(CurrentGlowdecks.EQUALIZER_COMMAND);
+                                // bluetoothSppManager.sendMessage(CurrentGlowdecks.EQUALIZER_COMMAND);
 
-                                        // break;
+                                // break;
 
-                                    }
+                                //}
 
-                                    msStreamsState = StreamsScreenState.PICKER_VIEW;
+                                msStreamsState = StreamsScreenState.PICKER_VIEW;
 
-                                    mCurrentFragment = new PickerFragment();
+                                mCurrentFragment = new PickerFragment();
 
-                                    position = DRAWER_SHOW_PICKER;
+                                position = DRAWER_SHOW_PICKER;
 
-                                    // noOp = false;
+                                // mDrawerLayout.closeDrawer(mDrawerList);
 
-                                    timeout = 100;
+                                noOp = false;
 
-                                    AppConfig.setRSDpend(false);
+                                timeout = 100;
 
-                                    // break;
+                                AppConfig.setRSDpend(false);
 
-                                }
+                                //break;
 
-                            }
+//                            }
 
                         }
 
@@ -1095,8 +1149,7 @@ public class MainActivity extends   Activity  {
 
                     GlowdeckDevice glowdeckDevice = getCurrentGlowdecks().getCurrentlyConnected() ;
 
-                    if (!bypassProvisioning)
-                    {
+                    if (!bypassProvisioning) {
                         AlertDialog.Builder provisionDialog = new AlertDialog.Builder(this);
                         TextView resultMessage = new TextView(this);
                         resultMessage.setTextSize(18);
@@ -1156,29 +1209,35 @@ public class MainActivity extends   Activity  {
                     mStreamSettingsOn = false ;
                     break;
                 case 	DRAWER_SHOW_PICKER:
-                    if ( (msCurrentGlowdecks == null) || (msCurrentGlowdecks.getCurrentlyConnected() == null) )
-                    {
+                    if ( (msCurrentGlowdecks == null) || (msCurrentGlowdecks.getCurrentlyConnected() == null) ) {
+                        noOp = true;
+                        break;
+                    }
+                    else if (msCurrentGlowdecks.getCurrentlyConnected() != null) {
+                       // String glowdeckName = msCurrentGlowdecks.getCurrentlyConnectedName();
+                        //setTitle();
+                        noOp = false;
+                    }
+                    //if (!msCurrentGlowdecks.getCurrentlyConnected().isReceivedInit())
+                    //{
                         //noOp = true ;
                         //break ;
-                    }
-                    if (!msCurrentGlowdecks.getCurrentlyConnected().isReceivedInit())
-                    {
-                        //noOp = true ;
-                        //break ;
-                    }
+                    //}
                     msStreamsState =  StreamsScreenState.PICKER_VIEW ;
                     mCurrentFragment = new PickerFragment();
                     mStreamSettingsOn = false ;
+                    // mDrawerLayout.closeDrawer(mDrawerList);
                     timeout = 100 ;
                     break;
 
                 default:
                     break ;
             }
-            if (noOp)
-            {
+
+            if (noOp) {
                 return ;
             }
+
             if (mCurrentFragment != null) {
 
 
@@ -1211,30 +1270,30 @@ public class MainActivity extends   Activity  {
 
 
                             int updatedPosition = finalPosition ;
-                            if (mStreamSettingsOn)
-                            {
+                            if (mStreamSettingsOn) {
                                 updatedPosition = 0 ;
                             }
-                            String menuTitle = "" ;
-                            if (updatedPosition >= DRAWER_START_PROVISION)
-                            {
+                            String menuTitle = "";
+
+                            if (updatedPosition >= DRAWER_START_PROVISION) {
                                 try{
-                                    if (updatedPosition == DRAWER_SHOW_MAIN_PROVISION)
-                                    {
-                                        menuTitle = Register_New_Device  ;
+                                    if (updatedPosition == DRAWER_SHOW_MAIN_PROVISION) {
+                                        menuTitle = Register_New_Device;
                                     }
-                                    if (updatedPosition == DRAWER_SHOW_PICKER)
+                                    if ((updatedPosition == DRAWER_SHOW_PICKER) || (updatedPosition == DRAWER_GLOWDECK_DEVICES0))
                                     {
-                                        menuTitle = Lights_Controller  ;
+                                        if (msCurrentGlowdecks == null)
+
+                                            menuTitle = Lights_Controller;
+                                        else
+                                            menuTitle = msCurrentGlowdecks.getCurrentlyConnectedName();
                                     }
                                 }catch(Exception e){e.printStackTrace();}
                             }
-                            else
-                            {
-                                menuTitle = mStreamsMenuTitles[updatedPosition].toUpperCase() ;
+                            else {
+                                menuTitle = mStreamsMenuTitles[updatedPosition];
                             }
-                            if (updatedPosition == DRAWER_GLOWDECK_DEVICES0 )
-                            {
+                            if (updatedPosition == DRAWER_GLOWDECK_DEVICES0) {
                                 try{
                                     BluetoothSppManager bluetoothSppManager = mStreamsApplication.getBluetoothSppManager() ;
                                     if (bluetoothSppManager != null)
@@ -1246,11 +1305,13 @@ public class MainActivity extends   Activity  {
 
                             setTitle(menuTitle);
 
-                            if (mFirstOpen == true)
-                            {
+                            if (mFirstOpen == true) {
                                 mFirstOpen = false;
-                            }else
+                            }
+                            else {
                                 mDrawerLayout.closeDrawer(mDrawerList);
+                            }
+
                         }
                     }, finalTimeout);
 
@@ -1366,6 +1427,10 @@ public class MainActivity extends   Activity  {
         try{
             mTitle = title;
             getActionBar().setTitle(mTitle);
+
+            //refresh action bar avoid truncating title
+            getActionBar().setDisplayHomeAsUpEnabled(false);
+            getActionBar().setDisplayHomeAsUpEnabled(true);
         }catch(Exception e){e.printStackTrace();}
     }
 
@@ -1549,15 +1614,15 @@ public class MainActivity extends   Activity  {
             }
             else
             {
-                if ((msStreamsState == StreamsScreenState.PROFILE_VIEW) && (msNextStreamsState == StreamsScreenState.STREAM_SETTINGS))
-                {
-                    try{
-                        msStreamsState = StreamsScreenState.STREAM_SETTINGS ;
-                        Intent intent = new Intent(MainActivity.this, StreamsSettingsActivity.class);
-                        startActivityForResult(intent,  0);
-                    }catch(Exception e){e.printStackTrace();}
-                }
-                else
+//                if ((msStreamsState == StreamsScreenState.PROFILE_VIEW) && (msNextStreamsState == StreamsScreenState.STREAM_SETTINGS))
+//                {
+////                    try{
+////                        msStreamsState = StreamsScreenState.STREAM_SETTINGS ;
+////                        Intent intent = new Intent(MainActivity.this, StreamsSettingsActivity.class);
+////                        startActivityForResult(intent,  0);
+////                    }catch(Exception e){e.printStackTrace();}
+//                }
+//                else
                 {
                     try{
                         if (!mDrawerLayout.isDrawerOpen(mDrawerList))
@@ -1621,7 +1686,6 @@ public class MainActivity extends   Activity  {
         return retVal ;
     }
 
-`
     /**
      *
      */

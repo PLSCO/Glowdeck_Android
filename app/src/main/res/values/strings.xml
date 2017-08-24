@@ -53,7 +53,7 @@
     <string-array name="streams_drawer_items">
         <item>Glowdeck</item>
         <item>Devices</item>
-        <item>Scanning...</item>
+        <item>Glowdeck</item>
         <item>Get More Devices</item>
         <item>Profile</item>
         <item>About</item>

@@ -36,7 +36,9 @@ import com.plsco.glowdeck.R;
  */
 public class SignOutFragment extends Fragment {
 
-	public SignOutFragment(){}
+	public SignOutFragment(){
+		setHasOptionsMenu(true);
+	}
 
 	/* (non-Javadoc)
 	 * @see android.app.Fragment#onCreateView(android.view.LayoutInflater, android.view.ViewGroup, android.os.Bundle)

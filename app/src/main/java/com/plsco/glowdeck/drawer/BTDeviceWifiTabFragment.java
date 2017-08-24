@@ -13,6 +13,7 @@ public class BTDeviceWifiTabFragment extends Fragment {
 	//private FragmentTabHost mTabHost;
 	//Mandatory Constructor
     public BTDeviceWifiTabFragment() {
+        setHasOptionsMenu(true);
     }
 	
 	

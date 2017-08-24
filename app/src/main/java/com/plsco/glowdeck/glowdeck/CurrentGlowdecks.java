@@ -715,7 +715,7 @@ public class CurrentGlowdecks {
 
 
 
-					mainActivity.displayView(MainActivity.DRAWER_START_PROVISION) ;
+					mainActivity.displayView(MainActivity.DRAWER_SHOW_PICKER) ;
 
 
 				}

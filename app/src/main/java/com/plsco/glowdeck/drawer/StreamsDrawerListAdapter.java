@@ -189,79 +189,102 @@ public class StreamsDrawerListAdapter extends  BaseAdapter
 								int elements =  MainActivity.getMainActivity().getCurrentGlowdecks().getmListGlowdecks().size() ;
 
 								GlowdeckDevice glowdeckDevice = MainActivity.getMainActivity().getCurrentGlowdecks().getDeviceAtPosition
-										(position- MainActivity.DRAWER_GLOWDECK_DEVICES0)  ;
+										(position - MainActivity.DRAWER_GLOWDECK_DEVICES0);
 
 
-								if (glowdeckDevice !=null)
-								{
+								if (glowdeckDevice != null) {
 
 									validFound = true ;
 									txtTitle.setText(glowdeckDevice.getName()) ;
 									txtTitle.setTextColor( textColor) ;
 									imgIcon.setAlpha(1.0f) ;
-									if (glowdeckDevice.isConnected())
-									{
+									if (glowdeckDevice.isConnected()) {
 										imgIcon.setImageResource(R.drawable.power_on_icon) ;
 										progressBar1.setVisibility(View.GONE) ;
-										if (StreamsApplication.DEBUG_MODE)
-										{
-											Log.d("dbg","GLOWDECK DEVICE IS ***** CONNECTED") ;
+
+										int selectGlowdeckIndex = position - MainActivity.DRAWER_GLOWDECK_DEVICES0;
+
+										String selectedGlowdeckName = MainActivity.getMainActivity().getCurrentGlowdecks().getCurrentlyConnectedName();
+
+										MainActivity.getMainActivity().mCurrentGlowdeckIndex = selectGlowdeckIndex;
+
+
+                                        if (StreamsApplication.DEBUG_MODE) {
+                                            Log.d("dbg","selectGlowdeckIndex: " + selectGlowdeckIndex);
+                                            Log.d("dbg","selectedGlowdeckName: " + selectedGlowdeckName);
+                                            Log.d("dbg","glowdeckDevice.getName() =" + glowdeckDevice.getName());
+                                        }
+
+										MainActivity.getMainActivity().getCurrentGlowdecks().setCurrentlySelected(MainActivity.getMainActivity().mCurrentGlowdeckIndex);
+                                        MainActivity.getMainActivity().setTitle(selectedGlowdeckName);
+
+
+                                        //if (glowdeckDevice != null) {
+                                        //    mCurrentDevice = glowdeckDevice ;
+										//}
+
+
+										if (StreamsApplication.DEBUG_MODE) {
+											Log.d("dbg","GLOWDECK DEVICE CONNECTED");
 										}
+
+										// Must dismiss the drawer here...
+										if (MainActivity.getMainActivity().mDrawerLayout.isDrawerOpen(MainActivity.getMainActivity().mDrawerList)) {
+											MainActivity.getMainActivity().mDrawerLayout.closeDrawer(MainActivity.getMainActivity().mDrawerList);
+										}
+
+										// MainActivity.setMainActivity(11); // getMainActivity().setmCurrentFragment(MainActivity.DRAWER_SHOW_PICKER);
 									}
 									else
 									{
-										if (StreamsApplication.DEBUG_MODE)
-										{
-											Log.d("dbg","GLOWDECK DEVICE IS *NOT* CONNECTED") ;
+										if (StreamsApplication.DEBUG_MODE) {
+											Log.d("dbg","GLOWDECK DEVICE DISCONNECTED");
 										}
-										if (MainActivity.getStreamsState() == StreamsScreenState.DEVICES_VIEW_DEVICES )
-										{
-											imgIcon.setImageResource(R.drawable.power_off_icon) ;
+
+										if (MainActivity.getStreamsState() == StreamsScreenState.DEVICES_VIEW_DEVICES) {
+											imgIcon.setImageResource(R.drawable.power_off_icon);
 										}
-										else
-										{
-											imgIcon.setImageResource(R.drawable.power_off_icon_dark) ;
+										else {
+											imgIcon.setImageResource(R.drawable.power_off_icon_dark);
+										}
+
+										// Must show the drawer here...
+										if (!MainActivity.getMainActivity().mDrawerLayout.isDrawerOpen(MainActivity.getMainActivity().mDrawerList)) {
+											MainActivity.getMainActivity().mDrawerLayout.openDrawer(MainActivity.getMainActivity().mDrawerList);
 										}
 									}
 
-									if (glowdeckDevice.isConnecting())
-									{
-										if (MainActivity.msDevicesClicked)
-										{
-											progressBar1.setVisibility(View.VISIBLE) ;
+									if (glowdeckDevice.isConnecting()) {
+										if (MainActivity.msDevicesClicked) {
+											progressBar1.setVisibility(View.VISIBLE);
 										}
 									}
-									else
-									{
-										progressBar1.setVisibility(View.GONE) ;
+									else {
+										progressBar1.setVisibility(View.GONE);
 
 									}
 								}
 
 
-								if (!validFound)
-								{
-									txtTitle.setTextColor( COLOR_OFF_WHITE) ;
-									imgIcon.setAlpha(0.0f) ; 
-
+								if (!validFound) {
+									txtTitle.setTextColor(COLOR_OFF_WHITE);
+									imgIcon.setAlpha(0.0f);
 								}
 							}
 						}
 					}
 				}
-				else
-
-				{
-					imgIcon.setVisibility(View.GONE) ;
-					txtTitle.setVisibility(View.GONE) ;
-					convertView.setVisibility(View.GONE) ;
-					progressBar1.setVisibility(View.GONE) ;
+				else {
+					imgIcon.setVisibility(View.GONE);
+					txtTitle.setVisibility(View.GONE);
+					convertView.setVisibility(View.GONE);
+					progressBar1.setVisibility(View.GONE);
 				}
 			}
 		}
-		}catch(Exception e){e.printStackTrace();}
-		return convertView;
+		} catch(Exception e){ e.printStackTrace(); }
 
+		return convertView;
 
 	}
 

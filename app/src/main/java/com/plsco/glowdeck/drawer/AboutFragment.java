@@ -92,6 +92,7 @@ public class AboutFragment extends Fragment {
 	private boolean connectedToGlowdeck = false ; 
 	public AboutFragment(){
 
+		setHasOptionsMenu(true);
 
 
 	}
@@ -426,7 +427,7 @@ public class AboutFragment extends Fragment {
 			
 			HttpClient httpclient = new DefaultHttpClient();
 
-			final String firmwareUrl = "https://streams.io/glowdeck/firmware/images/glowdeck.bin";
+			final String firmwareUrl = "https://streams.io/glowdeck/firmware/images/glowdeckBeta.bin";
 
 			int firmwareSize = 0 ; 
 			String line = null ;

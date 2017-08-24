@@ -717,7 +717,7 @@ public class BluetoothSppManager {
 					{
 						streamsDrawerListAdapter.notifyDataSetChanged() ;
 					}
-					if ( MainActivity.getStreamsState() ==  StreamsScreenState.ABOUT_VIEW )
+					if ( ( MainActivity.getStreamsState() ==  StreamsScreenState.ABOUT_VIEW ) || ( MainActivity.getStreamsState() ==  StreamsScreenState.PICKER_VIEW ) )
 					{
 						if (!MainActivity.isMsPaused())
 						{
