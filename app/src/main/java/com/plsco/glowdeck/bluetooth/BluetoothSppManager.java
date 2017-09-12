@@ -52,7 +52,7 @@ public class BluetoothSppManager {
 	private MainActivity mMainActivity ;
 	private String mCurrentGlowdeckName ; 
 	private boolean networkSSIDsReceived ; 
-	
+	public boolean firmwareUpdateInProgress = false;
 	/*
 	public void setNetworkSSIDsReceived(boolean networkSSIDsReceived) {
 		this.networkSSIDsReceived = networkSSIDsReceived;
@@ -783,44 +783,76 @@ public class BluetoothSppManager {
 			
 			
 			 
-			GlowdeckDevice currentGD = mMainActivity.getCurrentGlowdecks().getCurrentlyConnected() ;
-			if (currentGD != null) 
-			{
-				currentGD.setConnected(false) ;
-				currentGD.setCurrentlySelected(false) ;
-				mMainActivity.getCurrentGlowdecks().isConnected() ;
-				StreamsDrawerListAdapter streamsDrawerListAdapter = mainActivity.getmStreamsDrawerListAdapter() ;
-				if (streamsDrawerListAdapter != null)
-				{
-					streamsDrawerListAdapter.notifyDataSetChanged() ;
+			GlowdeckDevice currentGD = mMainActivity.getCurrentGlowdecks().getCurrentlyConnected();
+
+			if (currentGD != null) {
+
+				currentGD.setConnected(false);
+
+				currentGD.setCurrentlySelected(false);
+
+				mMainActivity.getCurrentGlowdecks().isConnected();
+
+				StreamsDrawerListAdapter streamsDrawerListAdapter = mainActivity.getmStreamsDrawerListAdapter();
+
+				if (streamsDrawerListAdapter != null) {
+
+					streamsDrawerListAdapter.notifyDataSetChanged();
+
 				}
-				mCurrentGlowdeckName = "" ; 
+
+				mCurrentGlowdeckName = "";
 			}
+
 			return;
+
 		}
 
 		// Check that there's actually something to send
 		if (message.length() > 0) {
+
 			// Get the message bytes and tell the MelodyService to write
 			byte[] send = message.getBytes();
 
 			try {
-				if (StreamsApplication.DEBUG_MODE)
-				{
+
+				if (StreamsApplication.DEBUG_MODE) {
+
 					Log.d("dbg","Sending ...:" + message) ;
+
 				}
+
+				if (message.contains("GFU^")) {
+
+					firmwareUpdateInProgress = true;
+
+				}
+
 				mSppService.send(send);
-			} catch (Exception e) {
+
+			}
+			catch (Exception e) {
+
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+
 			}
 		}
-		}catch(Exception e){e.printStackTrace();}
+		}
+		catch(Exception e) {
+
+			e.printStackTrace();
+
+		}
+
 	}
 	public void sendMessage(byte[] message) {
-		try{
-		// Check that we're actually connected before trying anything
+
+		try {
+
+			// Check that we're actually connected before trying anything
 		MainActivity mainActivity = MainActivity.getMainActivity()  ;
+
 		if (mSppService.getState() != ConnectionState.STATE_CONNECTED) {
 			
 			MainActivity.getMainActivity().runOnUiThread(new Runnable() {
@@ -831,27 +863,29 @@ public class BluetoothSppManager {
                 }
             });
 			
-			
-			
-			
-			
-			
-			
-			
-			
-			GlowdeckDevice currentGD = mMainActivity.getCurrentGlowdecks().getCurrentlyConnected() ;
-			if (currentGD != null) 
-			{
-				currentGD.setConnected(false) ;
-				currentGD.setCurrentlySelected(false) ;
-				mMainActivity.getCurrentGlowdecks().isConnected() ;
-				StreamsDrawerListAdapter streamsDrawerListAdapter = mainActivity.getmStreamsDrawerListAdapter() ;
-				if (streamsDrawerListAdapter != null)
-				{
-					streamsDrawerListAdapter.notifyDataSetChanged() ;
+
+			GlowdeckDevice currentGD = mMainActivity.getCurrentGlowdecks().getCurrentlyConnected();
+
+			if (currentGD != null) {
+
+				currentGD.setConnected(false);
+
+				currentGD.setCurrentlySelected(false);
+
+				mMainActivity.getCurrentGlowdecks().isConnected();
+
+				StreamsDrawerListAdapter streamsDrawerListAdapter = mainActivity.getmStreamsDrawerListAdapter();
+
+				if (streamsDrawerListAdapter != null) {
+
+					streamsDrawerListAdapter.notifyDataSetChanged();
+
 				}
-				mCurrentGlowdeckName = "" ; 
+
+				mCurrentGlowdeckName = "";
+
 			}
+
 			return;
 		}
 
@@ -861,8 +895,7 @@ public class BluetoothSppManager {
 			//byte[] send = message.getBytes();
 
 			try {
-				if (StreamsApplication.DEBUG_MODE)
-				{
+				if (StreamsApplication.DEBUG_MODE) {
 					//Log.d("dbg","Sending ...:" + message) ;
 				}
 				//Log.d("dbg","Sending " + message.length + " bytes.") ;
